@@ -61,15 +61,17 @@ export const constantRoutes = [
     path: '',
     component: Layout,
     redirect: '/index',
-    children: [
-      {
-        path: '/index',
-        component: () => import('@/views/index'),
-        name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
-    ]
+    hidden: true,
   },
+  {
+    path: '/index',
+    component: Layout,
+    component: () => import('@/views/index'),
+    name: 'Index',
+    hidden: true,
+  },
+
+
   {
     path: '/user',
     component: Layout,
@@ -79,7 +81,7 @@ export const constantRoutes = [
       {
         path: 'profile',
         component: () => import('@/views/system/user/profile/index'),
-        name: 'Profile',
+        name: 'Profile2',
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
@@ -157,7 +159,33 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
-  }
+  },
+  // {
+  //   path: '/servicer',
+  //   component: Layout,
+  //   roles: ['servicer'],
+  //   children:[
+  //     {
+  //       path: 'profile',
+  //       component: () => import('@/views/servicer/profile'),
+  //       name: 'Profile1',
+  //       meta: { title: '主体中心', icon: 'user', activeMenu: '/servicer/profile' }
+  //     }
+  //   ]
+  // },
+  // {
+  //   path: '/producter',
+  //   component: Layout,
+  //   roles: ['producter'],
+  //   children:[
+  //     {
+  //       path: 'profile',
+  //       component: () => import('@/views/producter/profile'),
+  //       name: 'Profile2',
+  //       meta: { title: '主体中心', icon: 'user', activeMenu: '/producter/profile' }
+  //     }
+  //   ]
+  // },
 ]
 
 const router = createRouter({
