@@ -2,7 +2,7 @@
     <div>
         <!-- 第一层服务类型选择 -->
         <strong>服务种类：</strong>
-        <el-checkbox-group v-model="selectedFirstLevelIds" @change="onFirstLevelChange">
+        <el-checkbox-group :disabled="disabled" v-model="selectedFirstLevelIds" @change="onFirstLevelChange">
             <el-checkbox v-for="item in typeList" :label="item.id" :key="item.id">
                 {{ item.name }}
             </el-checkbox>
@@ -14,7 +14,7 @@
         <div v-if="selectedFirstLevelIds.length !== 0" class="second-level">
             <strong>服务品种：</strong>
             <div v-for="firstLevel in typeList" :key="firstLevel.id">
-                <el-checkbox-group v-if="selectedFirstLevelIds.includes(firstLevel.id)"
+                <el-checkbox-group :disabled="disabled" v-if="selectedFirstLevelIds.includes(firstLevel.id)"
                     v-model="selectedSecondLevelIds[firstLevel.id]" @change="onSecondLevelChange(firstLevel)">
                     <el-checkbox v-for="secondLevel in firstLevel.children" :label="secondLevel.id" :key="secondLevel.id">
                         {{ secondLevel.name }}
@@ -29,7 +29,8 @@
         <div v-for="(secondLevelList, firstId) in selectedSecondLevelIds" :key="firstId">
             <div class="third-level" v-for="secondId in secondLevelList" :key="secondId">
                 <strong>{{ getSecondLevelName(firstId, secondId) }}:</strong>
-                <el-checkbox-group v-model="selectedThirdLevelIds[secondId]" @change="onThirdLevelChange">
+                <el-checkbox-group :disabled="disabled" v-model="selectedThirdLevelIds[secondId]"
+                    @change="onThirdLevelChange">
                     <el-checkbox v-for="thirdLevel in getThirdLevelItems(firstId, secondId)" :label="thirdLevel.id"
                         :key="thirdLevel.id">
                         {{ thirdLevel.name }}
@@ -41,8 +42,6 @@
 </template>
   
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { defineProps, defineEmits } from 'vue';
 import { listType } from '@/api/system/type'
 const { proxy } = getCurrentInstance();
 
@@ -51,6 +50,10 @@ const props = defineProps({
     modelValue: {
         type: String,
         default: ''
+    },
+    disabled: {
+        type: Boolean,
+        default: false,
     }
 });
 

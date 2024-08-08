@@ -37,16 +37,7 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/login',
-    component: () => import('@/views/login'),
-    hidden: true
-  },
-  {
-    path: '/register',
-    component: () => import('@/views/register'),
-    hidden: true
-  },
+
   {
     path: "/:pathMatch(.*)*",
     component: () => import('@/views/error/404'),
@@ -57,12 +48,37 @@ export const constantRoutes = [
     component: () => import('@/views/error/401'),
     hidden: true
   },
+
+
+
   {
-    path: '',
-    component: Layout,
-    redirect: '/index',
+    path: '/',
+    component: () => import('@/layout/DefaultLayout.vue'), // 使用布局组件
     hidden: true,
+    children: [
+      {
+        path: '',
+        redirect: '/home'
+      },
+      {
+        path: 'home',
+        name: 'Home',
+        component: () => import('@/views/home'),
+      },
+      {
+        path: 'login',
+        name: 'Login',
+        component: () => import('@/views/login'),
+      },
+      {
+        path: 'register',
+        name: 'Register',
+        component: () => import('@/views/register'),
+      },
+
+    ],
   },
+
   {
     path: '/index',
     component: Layout,

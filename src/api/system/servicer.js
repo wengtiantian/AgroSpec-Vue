@@ -35,6 +35,15 @@ export function updateServicer(data) {
   })
 }
 
+
+// 修改服务主体
+export function editStatus(data) {
+  return request({
+    url: '/system/servicer/editStatus',
+    method: 'put',
+    data: data
+  })
+}
 // 删除服务主体
 export function delServicer(id) {
   return request({

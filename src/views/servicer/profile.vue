@@ -19,8 +19,8 @@
       <el-descriptions-item label="经营状态">
         <dict-tag :options="es_manage_status" :value="basicData.manageForm" />
       </el-descriptions-item>
-      <el-descriptions-item label="服务区域ID">
-        {{ basicData.regionId }}
+      <el-descriptions-item label="地址">
+        {{ basicData.regionXx }}
       </el-descriptions-item>
       <el-descriptions-item label="主体介绍">
         {{ basicData.introduce }}
@@ -69,7 +69,24 @@
         </div>
 
       </el-descriptions-item>
+      <el-descriptions-item label="服务范围">
+        <ServiceTypeSelector :disabled="true" v-model="type" />
+
+      </el-descriptions-item>
     </el-descriptions>
+
+    <div v-for="(machine, index) in machineInfoList" :key="index">
+      <el-descriptions border :column="2">
+        <el-descriptions-item label="农机名称">{{ machine.machineName }}</el-descriptions-item>
+        <el-descriptions-item label="农机型号">{{ machine.machineModel }}</el-descriptions-item>
+        <el-descriptions-item label="终端编号">{{ machine.terminalNumber }}</el-descriptions-item>
+        <el-descriptions-item label="生产厂家">{{ machine.manufacturer }}</el-descriptions-item>
+        <el-descriptions-item label="农机图片URL"><image-preview :src="machine.machineImageUrl" :width="50"
+            :height="50" /></el-descriptions-item>
+      </el-descriptions>
+
+    </div>
+
 
     <h2 style="text-align: center; padding: 15px 0;">服务质量评价 <el-rate v-model="sqInfo.score" disabled show-score
         text-color="#ff9900" score-template="{value} 分" /></h2>
@@ -85,7 +102,9 @@
   
 <script setup>
 import { getServicerByUserId } from '@/api/system/servicer'
+import { listAll } from '@/api/system/machinery'
 import * as echarts from 'echarts';
+import ServiceTypeSelector from '@/views/servicer/TypeSelect.vue'
 const { proxy } = getCurrentInstance();
 
 const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
@@ -93,7 +112,7 @@ const baseUrl = import.meta.env.VITE_APP_BASE_API;
 // 创建一个响应式引用来保存DOM元素
 const chartDom = ref(null);
 const chartDom2 = ref(null);
-
+const type = ref('1,2,31,2,3:1,2,11:4,7,8')
 let chartInstance = null;
 let chartInstance2 = null;
 
@@ -103,14 +122,19 @@ const data = reactive({
     score: 4.2
   },
   queryParams: {},
-  rules: {}
+  rules: {},
+  machineInfoList: []
 });
 
-const { queryParams, basicData, rules, sqInfo } = toRefs(data);
+const { queryParams, basicData, rules, sqInfo, machineInfoList } = toRefs(data);
 
 function fetchServicerByUserId() {
   getServicerByUserId().then(response => {
     basicData.value = response.data;
+    listAll().then(response2 => {
+      machineInfoList.value = response2.data;
+      console.log(machineInfoList.value)
+    })
   })
 }
 

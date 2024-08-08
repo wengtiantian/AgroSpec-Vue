@@ -5,7 +5,7 @@
             <el-button type="primary" @click="startApplication">开始</el-button>
         </div>
     </el-watermark>
-    <el-watermark v-else-if="status === 2" content="待审核" :font="{ fontSize: 24 }">
+    <el-watermark v-else-if="status === 2" :content="process.auditResult ? '审核不通过' : '待审核'" :font="{ fontSize: 24 }">
         <div class="pending-content">
 
             <h2>申报信息</h2>
@@ -60,9 +60,19 @@
                 </el-descriptions>
 
             </div>
-            <div class="cxsq">
-                <el-button type="danger" @click="cancelApplication">撤销申请</el-button>
+            <div v-if="process.auditResult && process.auditResult == 1" class="cxsq">
+                <el-descriptions title="审核结果" border :column="2">
+                    <el-descriptions-item label="评语">{{ process.comments }}
+                    </el-descriptions-item>
+                    <el-descriptions-item label="结果">
+                        <dict-tag :options="sys_common_status" :value="process.auditResult" />
 
+                    </el-descriptions-item>
+
+                </el-descriptions>
+
+
+                <el-button type="danger" style="margin-top:10px" @click="handleSubmit">重新填写</el-button>
             </div>
         </div>
     </el-watermark>
@@ -101,15 +111,27 @@
 
                 <!-- Subject Situation -->
                 <el-descriptions-item label="主体介绍">{{ basicInfo.introduce }}</el-descriptions-item>
-                <el-descriptions-item label="主体Logo"> <image-preview :src="basicInfo.logo" :width="50" :height="50" />
+                <el-descriptions-item label="主体Logo">
+                    <image-preview :src="basicInfo.logo && basicInfo.logo" :width="50" :height="50" />
                 </el-descriptions-item>
-                <el-descriptions-item label="主体视频"> <video :src="baseUrl + basicInfo.video" controls width="500"
-                        height="200"></video>
+                <el-descriptions-item label="主体视频"> <video :src="basicInfo.video && (baseUrl + basicInfo.video)" controls
+                        width="500" height="200"></video>
                 </el-descriptions-item>
+
+
                 <el-descriptions-item label="营业执照">
-                    <image-preview :src="basicInfo.manageCert" :width="100" :height="100" /></el-descriptions-item>
-                <el-descriptions-item label="主体图片"><image-preview :src="basicInfo.pictureUrls" :width="100"
-                        :height="100" /></el-descriptions-item>
+                    <image-preview :src="basicInfo.manageCert && basicInfo.manageCert" :width="100" :height="100" />
+                </el-descriptions-item>
+
+
+                <el-descriptions-item label="主体图片">
+                    <image-preview :src="basicInfo.pictureUrls && basicInfo.pictureUrls" :width="100" :height="100" />
+                </el-descriptions-item>
+
+
+                <el-descriptions-item label="服务范围">
+                    <ServiceTypeSelector :disabled="true" v-model="storedPaths" />
+                </el-descriptions-item>
 
             </el-descriptions>
             <div v-for="(machine, index) in machineInfoList" :key="index">
@@ -163,9 +185,10 @@
 
                 </el-form-item>
                 <el-form-item label="地址">
-                    <el-input v-model="basicInfo.regionId" />
+                    <RegionCascader :width="'100%'" v-model:text="basicInfo.regionXx" v-model="selectedRegionPath" />
                 </el-form-item>
                 <el-form-item label="详细地址">
+
                     <el-input v-model="basicInfo.regionXx" />
                 </el-form-item>
 
@@ -267,40 +290,44 @@
 </template>
 <script setup>
 import { ref, watch } from 'vue';
-import { getServicerByUserId } from '@/api/system/servicer'
+import { getServicerByUserId, editStatus } from '@/api/system/servicer'
+import { submit, listAll } from '@/api/system/process'
 import ServiceTypeSelector from './TypeSelect.vue';
-const status = ref(0); // Could be 'notApplied', 'pending', or 'approved'
+import RegionCascader from './RegionSelect.vue';
+const status = ref(null); // Could be 'notApplied', 'pending', or 'approved'
 const showSteps = ref(false);
 const activeStep = ref(0);
+const selectedRegionPath = ref()
 const { proxy } = getCurrentInstance();
-const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
+const { es_is_auth, es_org_type, es_manage_status, sys_common_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status', 'sys_common_status');
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
 const storedPaths = ref('');
-
+const text = ref('');
 
 const data = reactive({
     basicInfo: {
-        name: '某某主体名称',
-        typeId: 1,
-        accountPhone: '13800138000',
-        corporate: '张三',
-        manageForm: 1,
-        regionXx: '北京市海淀区XX街道',
-        regionId: 101,
-        population: 50,
-        income: 200000.00,
-        serveNum: 100,
-        farmersNum: 20,
-        serveArea: 500.50,
-        raiseNum: 1500,
-        waterNum: 200,
-        otherNum: 300,
-        cropArea: 800.75,
-        introduce: '这是主体的介绍信息。',
-        logo: '/path/to/logo.png',
-        video: '/path/to/video.mp4',
-        manageCert: '/path/to/manage_cert.png',
-        pictureUrls: '/path/to/picture1.png,/path/to/picture2.png',
+        id: null,
+        name: null,
+        typeId: null,
+        accountPhone: null,
+        corporate: null,
+        manageForm: null,
+        regionXx: null,
+        regionId: null,
+        population: null,
+        income: null,
+        serveNum: null,
+        farmersNum: null,
+        serveArea: null,
+        raiseNum: null,
+        waterNum: null,
+        otherNum: null,
+        cropArea: null,
+        introduce: null,
+        logo: null,
+        video: null,
+        manageCert: null,
+        pictureUrls: null,
 
     },
     queryParams: {
@@ -313,31 +340,62 @@ const data = reactive({
         typePath: null
     },
 
-    machineInfoList: [{
-        machineName: '拖拉机',
-        machineModel: 'X123',
-        terminalNumber: 'A001',
-        manufacturer: '农机厂',
-        machineImageUrl: '/path/to/machine1.png'
+    process: {
+        id: null,
+        servicerId: null,
+        auditContent: null,
+        auditResult: null,
+        comments: null,
+        auditorId: null,
+        auditTime: null,
+        createTime: null,
+        updateTime: null,
+        deletedAt: null
     },
-    {
-        machineName: '播种机',
-        machineModel: 'Y456',
-        terminalNumber: 'A002',
-        manufacturer: '农机厂',
-        machineImageUrl: '/path/to/machine2.png'
-    }]
+
+    machineInfoList: []
 
 
 });
 
-const { basicInfo, machineInfoList, queryParams } = toRefs(data)
+const { basicInfo, machineInfoList, queryParams, process } = toRefs(data)
 
 
 function fetchServicerByUserId() {
     getServicerByUserId().then(response => {
-        basicInfo.value = response.data
         status.value = response.data.isAuth
+        if (status.value === 0) {
+            //未申请
+            basicInfo.value = response.data
+
+        } else if (status.value === 1) {
+            //已准入
+            // basicInfo.value = response.data
+            process.value.servicerId = response.data.id;
+            //待审核
+            listAll(process.value).then(res => {
+                process.value = res.data[res.data.length - 1];
+                const data = JSON.parse(res.data[res.data.length - 1].auditContent);
+                basicInfo.value = data.basicInfo;
+                machineInfoList.value = data.machineInfoList;
+                storedPaths.value = data.type;
+
+            })
+
+        } else if (status.value === 2) {
+            process.value.servicerId = response.data.id;
+            //待审核
+            listAll(process.value).then(res => {
+                process.value = res.data[res.data.length - 1];
+                const data = JSON.parse(res.data[res.data.length - 1].auditContent);
+                basicInfo.value = data.basicInfo;
+                machineInfoList.value = data.machineInfoList;
+                storedPaths.value = data.type;
+
+            })
+
+        }
+
     })
 }
 fetchServicerByUserId();
@@ -381,17 +439,40 @@ const previousStep = () => {
 
 const submitApplication = () => {
     console.log("Basic Info:", basicInfo.value);
-
-    // Logic to submit the application
-    status.value = 2;
-    showSteps.value = false;
-};
+    console.log("process.value:", process.value);
+    process.value = {
+        id: null,
+        servicerId: null,
+        auditContent: null,
+        auditResult: null,
+        comments: null,
+        auditorId: null,
+        auditTime: null,
+        createTime: null,
+        updateTime: null,
+        deletedAt: null
+    }
+    process.value.servicerId = basicInfo.value.id;
+    process.value.auditContent = JSON.stringify({ basicInfo: basicInfo.value, machineInfoList: machineInfoList.value, type: storedPaths.value })
+    console.log(process.value);
+    submit(process.value).then(res => {
+        editStatus({ id: process.value.servicerId, isAuth: 2 }).then(res2 => {
+            fetchServicerByUserId();
+            showSteps.value = false;
+        })
+    });
+}
 
 const cancelApplication = () => {
     // Logic to cancel the application
     status.value = 1;
 };
 
+const handleSubmit = () => {
+    showSteps.value = true;
+
+
+}
 </script>
 <style scoped>
 h2 {
