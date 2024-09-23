@@ -191,7 +191,7 @@
             <el-select v-model="form.auditResult" placeholder="请选择审核结果" clearable>
               <el-option v-for="dict in sys_common_status" :key="dict.value" :label="dict.label" :value="dict.value" />
             </el-select>
-            <el-button @click="handleSubmit">提交</el-button>
+            <el-button type="success" @click="handleSubmit">提交</el-button>
           </div>
         </div>
       </el-watermark>
@@ -425,3 +425,9 @@ function handleDetail(row) {
 
 getList();
 </script>
+<style scoped>
+.cxsq {
+  margin-top: 10px;
+  display: flex;
+}
+</style>

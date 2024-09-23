@@ -1,59 +1,32 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
       <el-form-item label="标准文件的名称" prop="fileName">
-        <el-input
-          v-model="queryParams.fileName"
-          placeholder="请输入标准文件的名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.fileName" placeholder="请输入标准文件的名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="发布该标准文件的机构名称" prop="issuingAgency">
-        <el-input
-          v-model="queryParams.issuingAgency"
-          placeholder="请输入发布该标准文件的机构名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.issuingAgency" placeholder="请输入发布该标准文件的机构名称" clearable
+          @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="文件的发布日期" prop="issueDate">
-        <el-date-picker clearable
-          v-model="queryParams.issueDate"
-          type="date"
-          value-format="YYYY-MM-DD"
+        <el-date-picker clearable v-model="queryParams.issueDate" type="date" value-format="YYYY-MM-DD"
           placeholder="请选择文件的发布日期">
         </el-date-picker>
       </el-form-item>
       <el-form-item label="文件开始实施的日期" prop="effectiveDate">
-        <el-date-picker clearable
-          v-model="queryParams.effectiveDate"
-          type="date"
-          value-format="YYYY-MM-DD"
+        <el-date-picker clearable v-model="queryParams.effectiveDate" type="date" value-format="YYYY-MM-DD"
           placeholder="请选择文件开始实施的日期">
         </el-date-picker>
       </el-form-item>
       <el-form-item label="文件所属的标准类别" prop="standardCategory">
-        <el-input
-          v-model="queryParams.standardCategory"
-          placeholder="请输入文件所属的标准类别"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.standardCategory" placeholder="请输入文件所属的标准类别" clearable
+          @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="文件的版本号" prop="versionNumber">
-        <el-input
-          v-model="queryParams.versionNumber"
-          placeholder="请输入文件的版本号"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.versionNumber" placeholder="请输入文件的版本号" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="文件修订的日期" prop="revisionDate">
-        <el-date-picker clearable
-          v-model="queryParams.revisionDate"
-          type="date"
-          value-format="YYYY-MM-DD"
+        <el-date-picker clearable v-model="queryParams.revisionDate" type="date" value-format="YYYY-MM-DD"
           placeholder="请选择文件修订的日期">
         </el-date-picker>
       </el-form-item>
@@ -65,42 +38,20 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['system:standards:add']"
-        >新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd"
+          v-hasPermi="['system:standards:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:standards:edit']"
-        >修改</el-button>
+        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate"
+          v-hasPermi="['system:standards:edit']">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:standards:remove']"
-        >删除</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['system:standards:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['system:standards:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="Download" @click="handleExport"
+          v-hasPermi="['system:standards:export']">导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -139,45 +90,36 @@
       <el-table-column label="任何其他需要说明的信息" align="center" prop="notes" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:standards:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:standards:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['system:standards:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['system:standards:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
+
+    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改标准管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="standardsRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="standardsRef" :model="form" :rules="rules">
         <el-form-item label="标准文件的名称" prop="fileName">
           <el-input v-model="form.fileName" placeholder="请输入标准文件的名称" />
         </el-form-item>
         <el-form-item label="标准文件" prop="fileNumber">
-          <file-upload v-model="form.fileNumber"/>
+          <file-upload v-model="form.fileNumber" />
         </el-form-item>
         <el-form-item label="发布该标准文件的机构名称" prop="issuingAgency">
           <el-input v-model="form.issuingAgency" placeholder="请输入发布该标准文件的机构名称" />
         </el-form-item>
         <el-form-item label="文件的发布日期" prop="issueDate">
-          <el-date-picker clearable
-            v-model="form.issueDate"
-            type="date"
-            value-format="YYYY-MM-DD"
+          <el-date-picker clearable v-model="form.issueDate" type="date" value-format="YYYY-MM-DD"
             placeholder="请选择文件的发布日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="文件开始实施的日期" prop="effectiveDate">
-          <el-date-picker clearable
-            v-model="form.effectiveDate"
-            type="date"
-            value-format="YYYY-MM-DD"
+          <el-date-picker clearable v-model="form.effectiveDate" type="date" value-format="YYYY-MM-DD"
             placeholder="请选择文件开始实施的日期">
           </el-date-picker>
         </el-form-item>
@@ -203,10 +145,7 @@
           <el-input v-model="form.versionNumber" placeholder="请输入文件的版本号" />
         </el-form-item>
         <el-form-item label="文件修订的日期" prop="revisionDate">
-          <el-date-picker clearable
-            v-model="form.revisionDate"
-            type="date"
-            value-format="YYYY-MM-DD"
+          <el-date-picker clearable v-model="form.revisionDate" type="date" value-format="YYYY-MM-DD"
             placeholder="请选择文件修订的日期">
           </el-date-picker>
         </el-form-item>
@@ -399,12 +338,12 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除标准管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除标准管理编号为"' + _ids + '"的数据项？').then(function () {
     return delStandards(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 /** 导出按钮操作 */

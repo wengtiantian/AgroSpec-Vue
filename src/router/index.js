@@ -1,7 +1,11 @@
 import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
-
+import ServiceSubjectDetail from '../views/ServiceSubjectDetail.vue';
+import ServiceStandardDetail from '../views/ServiceStandardDetail.vue';
+import OnlineReading from '../views/OnlineReading.vue';
+import SearchResult from '../views/SearchResult.vue';
+import SearchResultSubject from '../views/SearchResultSubject.vue';
 /**
  * Note: 路由配置项
  *
@@ -75,6 +79,31 @@ export const constantRoutes = [
         name: 'Register',
         component: () => import('@/views/register'),
       },
+      {
+        path: '/service-subject',
+        name: 'ServiceSubjectDetail',
+        component: ServiceSubjectDetail
+      },
+      {
+        path: '/service-standard',
+        name: 'ServiceStandardDetail',
+        component: ServiceStandardDetail
+      },
+      {
+        path: '/online-reading',
+        name: 'OnlineReading',
+        component: OnlineReading,
+      },
+      {
+        path: '/search-result',
+        name: 'SearchResult',
+        component: SearchResult,
+      },
+      {
+        path: '/search-result-subject',
+        name: 'SearchResultSubject',
+        component: SearchResultSubject,
+      }
 
     ],
   },

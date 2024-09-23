@@ -12,10 +12,10 @@ const { path } = params
 
 
 if (auth.hasRole("admin")) {
-  router.replace({ path: "/servicer",query});
+  router.push({ path: "/servicer", query });
 } else if (auth.hasRole("servicer")) {
-  router.replace({ path: "/servicer/profile",query });
+  router.push({ path: "/servicer/profile", query });
 } else if (auth.hasRole("producter")) {
-  router.replace({ path: "/producter/profile",query });
+  router.push({ path: "/producter/profile", query });
 }
 </script>

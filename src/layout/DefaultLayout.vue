@@ -3,10 +3,10 @@
     <div>
         <!-- 顶部导航栏 -->
         <header :class="['header', { 'header-scrolled': isScrolled || !isHome() }]">
-            <div class="left-content">
+            <div @click="GoHome" class="left-content">
                 <img src="../assets/logo/logo.jpeg" alt="logo" class="logo">
                 <div v-if="isScrolled || !isHome()" class="text">
-                    乡村特色产业社会化服务技术规范、主体准入与质量评价数字化系统
+                    乡村特色产业标准化生产服务规范与质量评价系统
                 </div>
             </div>
             <div v-if="!isLoginOrRegister()" class="auth">
@@ -38,6 +38,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import useUserStore from '@/store/modules/user'
+import { useRouter } from 'vue-router';
 
 const user = useUserStore();
 const isLoggedIn = ref(false);
@@ -63,6 +64,11 @@ const onScroll = () => {
     const bannerHeight = 80; // 与 banner 的高度相同
     isScrolled.value = window.scrollY > bannerHeight;
 };
+const router = useRouter();
+
+const GoHome = () => {
+    router.push('/home')
+}
 
 
 
@@ -93,14 +99,19 @@ onUnmounted(() => {
   
 <style scoped>
 .header-scrolled {
-    background-color: rgba(255, 255, 255);
+    background-color: rgba(255, 255, 255) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 
 }
 
 .left-content {
+
     display: flex;
     align-items: center;
+}
+
+.left-content:hover {
+    cursor: pointer;
 }
 
 .logo {
@@ -128,11 +139,11 @@ onUnmounted(() => {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    /* background-color: #fff; */
+    background-color: transparent;
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 99999;
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
     height: 80px;
 }

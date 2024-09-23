@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <el-form ref="registerRef" :model="registerForm" :rules="registerRules" class="register-form">
-      <h3 class="title">注册-乡村特色产业社会化服务技术规范、主体准入与质量评价数字化系统</h3>
+      <h3 class="title">注册-乡村特色产业标准化生产服务规范与质量评价系统</h3>
       <el-form-item prop="username">
         <el-input v-model="registerForm.username" type="text" size="large" auto-complete="off" placeholder="账号">
           <template #prefix><svg-icon icon-class="user" class="el-input__icon input-icon" /></template>
@@ -18,6 +18,12 @@
           placeholder="确认密码" @keyup.enter="handleRegister">
           <template #prefix><svg-icon icon-class="password" class="el-input__icon input-icon" /></template>
         </el-input>
+      </el-form-item>
+      <el-form-item prop="role">
+        <el-radio-group v-model="registerForm.role">
+          <el-radio label="1" size="large" border>生产主体</el-radio>
+          <el-radio label="2" size="large" border>服务主体</el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item prop="code" v-if="captchaEnabled">
         <el-input size="large" v-model="registerForm.code" auto-complete="off" placeholder="验证码" style="width: 63%"
@@ -54,7 +60,8 @@ const registerForm = ref({
   password: "",
   confirmPassword: "",
   code: "",
-  uuid: ""
+  uuid: "",
+  role: ''
 });
 
 const equalToPassword = (rule, value, callback) => {
