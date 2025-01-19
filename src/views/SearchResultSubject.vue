@@ -102,7 +102,11 @@
         <el-table size="large" border stripe v-loading="loading" :data="servicerList"
             @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />
-            <el-table-column label="名称" align="center" prop="name" />
+            <el-table-column label="名称" align="center" prop="name">
+                <template #default="scope">
+                    <el-button link type="default" @click="handleRead(scope.row)">{{ scope.row.name }}</el-button>
+                </template>
+            </el-table-column>
             <el-table-column label="组织类型" align="center" prop="typeId">
                 <template #default="scope">
                     <dict-tag :options="es_org_type" :value="scope.row.typeId" />
@@ -115,9 +119,20 @@
                     <dict-tag :options="es_manage_status" :value="scope.row.manageForm" />
                 </template>
             </el-table-column>
-            <el-table-column label="服务区域" align="center" prop="regionId" />
-            <el-table-column label="主体介绍" align="center" prop="introduce" />
-            <el-table-column label="是否认证" align="center" prop="isAuth">
+            <el-table-column label="联系地址" align="center" prop="regionId">
+                <template #default="scope">
+                    {{ scope.row.regionPre + scope.row.regionXx }}
+                </template>
+            </el-table-column>
+            <el-table-column label="主体介绍" align="center" prop="introduce">
+                <template #default="scope">
+                    <el-tooltip effect="dark" :content="scope.row.introduce && scope.row.introduce" placement="top-start">
+                        {{ scope.row.introduce && scope.row.introduce.substring(0, 10) }}
+                    </el-tooltip>
+
+                </template>
+            </el-table-column>
+            <el-table-column label="准入状态" align="center" prop="isAuth">
                 <template #default="scope">
                     <dict-tag :options="es_is_auth" :value="scope.row.isAuth" />
                 </template>
@@ -142,8 +157,9 @@
 </template>
   
 <script setup name="Servicer">
-import { listServicer, getServicer, delServicer, addServicer, updateServicer } from "@/api/system/servicer";
+import { listServicer } from "@/api/public";
 import recommendations from '@/views/Recommendations.vue'
+import { useRouter } from "vue-router";
 
 const { proxy } = getCurrentInstance();
 const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
@@ -298,6 +314,12 @@ function handleAdd() {
     reset();
     open.value = true;
     title.value = "添加服务主体";
+}
+const router = useRouter();
+function handleRead(row) {
+    const _id = row.id
+
+    router.push({ name: 'ServiceSubjectDetail', query: { id: _id } })
 }
 
 /** 修改按钮操作 */

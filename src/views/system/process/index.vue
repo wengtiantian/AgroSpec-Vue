@@ -1,15 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="服务主体ID" prop="servicerId">
+      <!-- <el-form-item label="服务主体ID" prop="servicerId">
         <el-input v-model="queryParams.servicerId" placeholder="请输入服务主体ID" clearable @keyup.enter="handleQuery" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="审核结果" prop="auditResult">
         <el-select v-model="queryParams.auditResult" placeholder="请选择审核结果" clearable>
-          <el-option v-for="dict in sys_common_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+          <el-option v-for="dict in es_sh_jg" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="审核人" prop="auditorId">
+      <!-- <el-form-item label="审核人" prop="auditorId">
         <el-input v-model="queryParams.auditorId" placeholder="请输入审核人" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="审核时间" prop="auditTime">
@@ -21,7 +21,7 @@
         <el-date-picker clearable v-model="queryParams.deletedAt" type="date" value-format="YYYY-MM-DD"
           placeholder="请选择软删除标识时间">
         </el-date-picker>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -49,21 +49,22 @@
 
     <el-table v-loading="loading" :data="processList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="审核流程ID" align="center" prop="id" />
-      <el-table-column label="服务主体ID" align="center" prop="servicerId" />
+      <el-table-column label="审核流程编号" align="center" prop="id" />
+      <el-table-column label="服务主体名称" align="center" prop="servicerId" />
       <!-- <el-table-column label="审核内容" align="center" prop="auditContent" /> -->
       <el-table-column label="审核结果" align="center" prop="auditResult">
         <template #default="scope">
-          <dict-tag :options="sys_common_status" :value="scope.row.auditResult" />
+          <div v-if="scope.row.auditResult == null">待审核</div>
+          <dict-tag v-else :options="es_sh_jg" :value="scope.row.auditResult" />
         </template>
       </el-table-column>
       <el-table-column label="评语" align="center" prop="comments" />
-      <el-table-column label="审核人" align="center" prop="auditorId" />
-      <el-table-column label="审核时间" align="center" prop="auditTime" width="180">
+      <!-- <el-table-column label="审核人" align="center" prop="auditorId" /> -->
+      <!-- <el-table-column label="审核时间" align="center" prop="auditTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.auditTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.auditTime, '{y}-{m}-{d} {h}:{m}:{s}') }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <!-- <el-table-column label="软删除标识时间" align="center" prop="deletedAt" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.deletedAt, '{y}-{m}-{d}') }}</span>
@@ -85,7 +86,7 @@
     <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
       @pagination="getList" />
 
-    <!-- 添加或修改服务主体审核对话框 -->
+    <!-- 添加或修改服务主体审核对话框
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="processRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="服务主体ID" prop="servicerId">
@@ -96,7 +97,7 @@
         </el-form-item>
         <el-form-item label="审核结果" prop="auditResult">
           <el-radio-group v-model="form.auditResult">
-            <el-radio v-for="dict in sys_common_status" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
+            <el-radio v-for="dict in es_sh_jg" :key="dict.value" :label="parseInt(dict.value)">{{ dict.label
             }}</el-radio>
           </el-radio-group>
         </el-form-item>
@@ -122,7 +123,7 @@
           <el-button @click="cancel">取 消</el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-dialog> -->
 
     <el-dialog v-model="openDeatil" append-to-body>
       <el-watermark :content="content" :font="{ fontSize: 24 }">
@@ -138,8 +139,8 @@
             <el-descriptions-item label="法人代表">{{ basicInfo.corporate }}</el-descriptions-item>
             <el-descriptions-item label="经营状态"> <dict-tag :options="es_manage_status" :value="basicInfo.manageForm" />
             </el-descriptions-item>
-            <el-descriptions-item label="详细地址">{{ basicInfo.regionXx }}</el-descriptions-item>
-            <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item>
+            <el-descriptions-item label="详细地址">{{ basicInfo.regionPre + basicInfo.regionXx }}</el-descriptions-item>
+            <!-- <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item> -->
 
             <!-- Service Situation -->
             <el-descriptions-item label="从业人数">{{ basicInfo.population }}</el-descriptions-item>
@@ -163,16 +164,17 @@
               <image-preview :src="basicInfo.manageCert" :width="100" :height="100" /></el-descriptions-item>
             <el-descriptions-item label="主体图片"><image-preview :src="basicInfo.pictureUrls" :width="100"
                 :height="100" /></el-descriptions-item>
-            <el-descriptions-item label="">
-              <ServiceTypeSelector :disabled="true" v-model="storedPaths" />
-
+            <el-descriptions-item label="服务品种">
+              <div :key="item" v-for=" item  in  basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx) ">{{
+                item }}</div>
+              <!-- {{ basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx) }} -->
             </el-descriptions-item>
 
           </el-descriptions>
           <!-- Agricultural Machinery Information -->
 
 
-          <div v-for="(machine, index) in machineInfoList" :key="index">
+          <div v-for="( machine, index ) in  machineInfoList " :key="index">
             <el-descriptions border :column="2">
               <el-descriptions-item label="农机名称">{{ machine.machineName }}</el-descriptions-item>
               <el-descriptions-item label="农机型号">{{ machine.machineModel }}</el-descriptions-item>
@@ -189,7 +191,7 @@
           <div v-if="!isDetail" class="cxsq">
             <el-input v-model="form.comments"></el-input>
             <el-select v-model="form.auditResult" placeholder="请选择审核结果" clearable>
-              <el-option v-for="dict in sys_common_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+              <el-option v-for=" dict  in  es_sh_jg " :key="dict.value" :label="dict.label" :value="dict.value" />
             </el-select>
             <el-button type="success" @click="handleSubmit">提交</el-button>
           </div>
@@ -206,9 +208,8 @@ import ServiceTypeSelector from '@/views/servicer/TypeSelect.vue'
 const { proxy } = getCurrentInstance();
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
 import { updateServicer } from '@/api/system/servicer'
-
-const { sys_common_status, es_manage_status, es_org_type } = proxy.useDict('sys_common_status', 'es_manage_status', 'es_org_type');
-const storedPaths = ref('');
+import { mergeFruitData } from '@/utils/service-type'
+const { es_sh_jg, es_manage_status, es_org_type } = proxy.useDict('es_sh_jg', 'es_manage_status', 'es_org_type');
 const processList = ref([]);
 const open = ref(false);
 const loading = ref(true);
@@ -325,25 +326,25 @@ function handleUpdate(row) {
 }
 
 /** 提交按钮 */
-function submitForm() {
-  proxy.$refs["processRef"].validate(valid => {
-    if (valid) {
-      if (form.value.id != null) {
-        updateProcess(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          getList();
-        });
-      } else {
-        addProcess(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          getList();
-        });
-      }
-    }
-  });
-}
+// function submitForm() {
+//   proxy.$refs["processRef"].validate(valid => {
+//     if (valid) {
+//       if (form.value.id != null) {
+//         updateProcess(form.value).then(response => {
+//           proxy.$modal.msgSuccess("修改成功");
+//           open.value = false;
+//           getList();
+//         });
+//       } else {
+//         addProcess(form.value).then(response => {
+//           proxy.$modal.msgSuccess("新增成功");
+//           open.value = false;
+//           getList();
+//         });
+//       }
+//     }
+//   });
+// }
 
 /** 删除按钮操作 */
 function handleDelete(row) {
@@ -371,7 +372,6 @@ function handleAudit(row) {
     const data = JSON.parse(form.value.auditContent);
     basicInfo.value = data.basicInfo;
     machineInfoList.value = data.machineInfoList;
-    storedPaths.value = data.type;
     isDetail.value = false;
     content.value = '待审核';
     openDeatil.value = true;
@@ -383,6 +383,9 @@ function handleSubmit() {
   if (form.value.auditResult == 0) {
     //通过
     basicInfo.value.isAuth = 1;
+    basicInfo.value.regionId = JSON.stringify(basicInfo.value.regionId)
+    basicInfo.value.serviceTypePath = JSON.stringify(basicInfo.value.serviceTypePath)
+    basicInfo.value.serviceTypeXx = JSON.stringify(basicInfo.value.serviceTypeXx)
     updateServicer(basicInfo.value).then(res => {
       machineInfoList.value.map(machine => { machine.serviceSubjectId = basicInfo.value.id; return machine; })
       Promise.all(machineInfoList.value.map(machine => addMachinery(machine))).then(res => {
@@ -413,7 +416,6 @@ function handleDetail(row) {
     const data = JSON.parse(form.value.auditContent);
     basicInfo.value = data.basicInfo;
     machineInfoList.value = data.machineInfoList;
-    storedPaths.value = data.type;
     isDetail.value = true;
     content.value = '已审核';
     openDeatil.value = true;

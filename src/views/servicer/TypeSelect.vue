@@ -48,16 +48,20 @@ const { proxy } = getCurrentInstance();
 // 组件的props和emits
 const props = defineProps({
     modelValue: {
-        type: String,
+        type: Array,
         default: ''
     },
     disabled: {
         type: Boolean,
         default: false,
+    },
+    selectedText: {
+        type: Array,
+        default: () => [],
     }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'update:selectedText']);
 
 // 状态变量
 const typeList = ref([]);
@@ -78,6 +82,7 @@ function getList() {
     },
     ).then(response => {
         typeList.value = proxy.handleTree(response.data, "id", "pid");
+        console.log(props.modelValue)
         props.modelValue && restoreSelection(props.modelValue);
 
     });
@@ -125,10 +130,31 @@ const onSecondLevelChange = (firstLevel) => {
 };
 
 // 处理第三层选择变化
-const onThirdLevelChange = () => {
-    emit('update:modelValue', selectedPaths.value.join(':'));
-};
+// const onThirdLevelChange = () => {
+//     console.log(selectedPaths.value)
+//     emit('update:modelValue', selectedPaths);
+// };
 
+const onThirdLevelChange = () => {
+    const texts = [];
+    for (let firstId in selectedSecondLevelIds.value) {
+        const firstLevelName = typeList.value.find(item => item.id === parseInt(firstId)).name; // Get first level name
+        selectedSecondLevelIds.value[firstId].forEach((secondId) => {
+            const secondLevelName = getSecondLevelName(firstId, secondId);
+            if (selectedThirdLevelIds.value[secondId]) {
+                selectedThirdLevelIds.value[secondId].forEach((thirdId) => {
+                    const thirdLevelName = getThirdLevelItems(firstId, secondId).find(item => item.id === thirdId).name;
+                    texts.push(`${firstLevelName}, ${secondLevelName}, ${thirdLevelName}`);
+                });
+            } else {
+                texts.push(`${firstLevelName}, ${secondLevelName}`);
+            }
+        });
+    }
+    console.log(texts)
+    emit('update:modelValue', selectedPaths);
+    emit('update:selectedText', texts);
+};
 // 获取第二层名称
 const getSecondLevelName = (firstId, secondId) => {
     const firstLevel = typeList.value.find((item) => item.id === parseInt(firstId));
@@ -145,7 +171,7 @@ const getThirdLevelItems = (firstId, secondId) => {
 
 // 还原选择
 const restoreSelection = (paths) => {
-    paths.split(':').forEach((path) => {
+    paths.forEach((path) => {
         const ids = path.split(',').map((id) => parseInt(id));
 
         // 第一层

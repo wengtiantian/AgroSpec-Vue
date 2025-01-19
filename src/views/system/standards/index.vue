@@ -62,32 +62,38 @@
       <el-table-column label="标准文件的名称" align="center" prop="fileName" />
       <el-table-column label="标准文件" align="center" prop="fileNumber" />
       <el-table-column label="发布该标准文件的机构名称" align="center" prop="issuingAgency" />
+
+      <!-- <el-table-column label="文件开始实施的日期" align="center" prop="effectiveDate" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.effectiveDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column> -->
+      <el-table-column label="文件所属的标准类别" align="center" prop="standardCategory" />
+      <el-table-column label="文件适用的农业服务范围" align="center" prop="serviceScope" />
+      <el-table-column label="具体的服务项目或内容" align="center" prop="serviceItems" />
+      <!-- <el-table-column label="服务的具体要求和规范" align="center" prop="serviceRequirements" /> -->
+      <!-- <el-table-column label="技术标准和参数" align="center" prop="technicalParameters" />
+      <el-table-column label="服务质量的评估指标" align="center" prop="qualityIndicators" /> -->
+      <!-- <el-table-column label="文件的版本号" align="center" prop="versionNumber" /> -->
+      <!-- <el-table-column label="文件修订的日期" align="center" prop="revisionDate" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.revisionDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column> -->
+      <!-- <el-table-column label="修订内容的简要说明" align="center" prop="revisionNotes" />
+      <el-table-column label="相关或引用的其他标准文件" align="center" prop="relatedFiles" /> -->
+      <el-table-column label="其他附加资料或附件" align="center" prop="attachments">
+        <template #default="scope">
+          <image-preview :src="scope.row.attachments" :width="50" :height="50" />
+        </template>
+
+      </el-table-column>
       <el-table-column label="文件的发布日期" align="center" prop="issueDate" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.issueDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="文件开始实施的日期" align="center" prop="effectiveDate" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.effectiveDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="文件所属的标准类别" align="center" prop="standardCategory" />
-      <el-table-column label="文件适用的农业服务范围" align="center" prop="serviceScope" />
-      <el-table-column label="具体的服务项目或内容" align="center" prop="serviceItems" />
-      <el-table-column label="服务的具体要求和规范" align="center" prop="serviceRequirements" />
-      <el-table-column label="技术标准和参数" align="center" prop="technicalParameters" />
-      <el-table-column label="服务质量的评估指标" align="center" prop="qualityIndicators" />
-      <el-table-column label="文件的版本号" align="center" prop="versionNumber" />
-      <el-table-column label="文件修订的日期" align="center" prop="revisionDate" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.revisionDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="修订内容的简要说明" align="center" prop="revisionNotes" />
-      <el-table-column label="相关或引用的其他标准文件" align="center" prop="relatedFiles" />
-      <el-table-column label="其他附加资料或附件" align="center" prop="attachments" />
-      <el-table-column label="任何其他需要说明的信息" align="center" prop="notes" />
+      <!-- <el-table-column label="任何其他需要说明的信息" align="center" prop="notes" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
@@ -156,7 +162,7 @@
           <el-input v-model="form.relatedFiles" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="其他附加资料或附件" prop="attachments">
-          <el-input v-model="form.attachments" type="textarea" placeholder="请输入内容" />
+          <image-upload v-model="form.attachments" />
         </el-form-item>
         <el-form-item label="任何其他需要说明的信息" prop="notes">
           <el-input v-model="form.notes" type="textarea" placeholder="请输入内容" />

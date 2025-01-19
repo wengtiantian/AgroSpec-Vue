@@ -20,8 +20,8 @@
           <el-option v-for="dict in es_manage_status" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="服务区域" prop="regionId">
-        <el-input v-model="queryParams.regionId" placeholder="请输入服务区域" clearable @keyup.enter="handleQuery" />
+      <el-form-item label="地址" prop="regionId">
+        <el-input v-model="queryParams.regionId" placeholder="请输入地址" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item label="从业人数" prop="population">
         <el-input v-model="queryParams.population" placeholder="请输入从业人数" clearable @keyup.enter="handleQuery" />
@@ -96,8 +96,19 @@
           <dict-tag :options="es_manage_status" :value="scope.row.manageForm" />
         </template>
       </el-table-column>
-      <el-table-column label="服务区域" align="center" prop="regionId" />
-      <el-table-column label="主体介绍" align="center" prop="introduce" />
+      <el-table-column label="地址" align="center" prop="regionXx">
+        <template #default="scope">
+          {{ scope.row.regionPre + scope.row.regionXx }}
+        </template>
+      </el-table-column>
+      <el-table-column label="主体介绍" align="center" prop="introduce">
+        <template #default="scope">
+          <el-tooltip effect="dark" :content="scope.row.introduce && scope.row.introduce" placement="top-start">
+            {{ scope.row.introduce && scope.row.introduce.substring(0, 10) }}
+          </el-tooltip>
+
+        </template>
+      </el-table-column>
       <el-table-column label="主体Logo" align="center" prop="logo" width="100">
         <template #default="scope">
           <image-preview :src="scope.row.logo" :width="50" :height="50" />
@@ -138,7 +149,7 @@
 
     <!-- 添加或修改服务主体对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="servicerRef" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="servicerRef" :model="form" :rules="rules">
         <!-- <el-form-item label="用户ID" prop="userId">
           <el-input v-model="form.userId" placeholder="请输入用户ID" />
         </el-form-item> -->
@@ -163,8 +174,11 @@
               :value="parseInt(dict.value)"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="服务区域" prop="regionId">
-          <el-input v-model="form.regionId" placeholder="请输入服务区域" />
+        <el-form-item label="地址" prop="regionId">
+          <!-- {{ form.regionPre }}
+          {{ form.regionId }} -->
+          <RegionCascader :width="'100%'" v-model:text="form.regionPre" v-model="form.regionId" />
+          <el-input v-model="form.regionXx" placeholder="请输入详细地址" />
         </el-form-item>
         <el-form-item label="主体介绍">
           <editor v-model="form.introduce" :min-height="192" />
@@ -205,12 +219,12 @@
         <el-form-item label="服务粮食作物面积" prop="cropArea">
           <el-input v-model="form.cropArea" placeholder="请输入服务粮食作物面积" />
         </el-form-item>
-        <el-form-item label="是否认证" prop="isAuth">
+        <!-- <el-form-item label="是否认证" prop="isAuth">
           <el-select v-model="form.isAuth" placeholder="请选择是否认证">
             <el-option v-for="dict in es_is_auth" :key="dict.value" :label="dict.label"
               :value="parseInt(dict.value)"></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -224,7 +238,8 @@
 
 <script setup name="Servicer">
 import { listServicer, getServicer, delServicer, addServicer, updateServicer } from "@/api/system/servicer";
-
+import RegionCascader from '../../servicer/RegionSelect.vue';
+import { getRegionTextByPath } from '@/utils/region'
 const { proxy } = getCurrentInstance();
 const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
 
@@ -237,6 +252,7 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+const preRegionText = ref("");
 
 const data = reactive({
   form: {},
@@ -283,6 +299,7 @@ const { queryParams, form, rules } = toRefs(data);
 function getList() {
   loading.value = true;
   listServicer(queryParams.value).then(response => {
+
     servicerList.value = response.rows;
     total.value = response.total;
     loading.value = false;
@@ -306,6 +323,7 @@ function reset() {
     corporate: null,
     manageForm: null,
     regionId: null,
+    regionXx: null,
     introduce: null,
     logo: null,
     video: null,
@@ -360,6 +378,7 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getServicer(_id).then(response => {
     form.value = response.data;
+    form.value.regionId = JSON.parse(form.value.regionId)
     open.value = true;
     title.value = "修改服务主体";
   });
@@ -370,12 +389,18 @@ function submitForm() {
   proxy.$refs["servicerRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
+        form.value.regionId = JSON.stringify(form.value.regionId)
+
+        console.log(preRegionText.value)
+        console.log(form.value.regionXx)
         updateServicer(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
+        form.value.regionId = JSON.stringify(form.value.regionId)
+        console.log(form.value.regionXx)
         addServicer(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;

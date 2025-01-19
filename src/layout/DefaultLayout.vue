@@ -12,7 +12,7 @@
             <div v-if="!isLoginOrRegister()" class="auth">
                 <template v-if="isLoggedIn">
                     <span class="admin-link">欢迎, {{ username }}</span>
-                    <router-link to="/index" class="admin-link">后台管理</router-link>
+                    <a href="/index" target="_blank" class="admin-link">后台管理</a>
                 </template>
                 <template v-else>
                     <router-link to="/login" class="auth-link"> 登录</router-link>
@@ -30,7 +30,7 @@
         </main>
         <!--  底部  -->
         <div class="el-login-footer">
-            <span>Copyright © 2018-2024 江西农业大学 All Rights Reserved.</span>
+            <span>Copyright © 2022-2024 江西农业大学 All Rights Reserved.</span>
         </div>
     </div>
 </template>
@@ -143,7 +143,7 @@ onUnmounted(() => {
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 99999;
+    z-index: 999;
     /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
     height: 80px;
 }

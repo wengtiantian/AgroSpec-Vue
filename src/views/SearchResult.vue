@@ -43,8 +43,7 @@
             <!-- <el-table-column label="标准编号" align="center" prop="id" /> -->
             <el-table-column label="名称" align="center" prop="fileName">
                 <template #default="scope">
-                    <el-button link type="default" @click="handleUpdate(scope.row)"
-                        v-hasPermi="['system:standards:edit']">{{ scope.row.fileName }}</el-button>
+                    <el-button link type="default" @click="handleRead(scope.row)">{{ scope.row.fileName }}</el-button>
                 </template>
             </el-table-column>
             <!-- <el-table-column label="标准文件" align="center" prop="fileNumber" /> -->
@@ -58,10 +57,8 @@
             <el-table-column label="服务范围" align="center" prop="serviceScope" />
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
                 <template #default="scope">
-                    <el-button link type="primary" icon="Reading" @click="handleUpdate(scope.row)"
-                        v-hasPermi="['system:standards:edit']">在线阅读</el-button>
-                    <el-button link type="primary" icon="Download" @click="handleDelete(scope.row)"
-                        v-hasPermi="['system:standards:remove']">下载</el-button>
+                    <el-button link type="primary" icon="Reading" @click="handleRead(scope.row)">在线阅读</el-button>
+                    <el-button link type="primary" icon="Download" @click="handleDownload(scope.row)">下载</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -79,7 +76,7 @@
 </template>
   
 <script setup name="Standards">
-import { listStandards, getStandards, delStandards, addStandards, updateStandards } from "@/api/system/standards";
+import { listStandards } from "@/api/public";
 import recommendations from '@/views/Recommendations.vue'
 
 const { proxy } = getCurrentInstance();
@@ -188,7 +185,7 @@ function reset() {
         createTime: null,
         updateBy: null,
         updateTime: null,
-        isDeleted: null
+        isDownloadd: null
     };
     proxy.resetForm("standardsRef");
 }
@@ -233,26 +230,15 @@ function handleSelectionChange(selection) {
 }
 const router = useRouter()
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
+
 /** 修改按钮操作 */
-function handleUpdate(row) {
+function handleRead(row) {
     const _id = row.fileNumber
 
     openNewWindow('/online-reading?src=' + baseUrl + _id)
     // router.push({ name: 'OnlineReading', query: { src: baseUrl + _id } })
 }
 
-
-
-/** 删除按钮操作 */
-function handleDelete(row) {
-    const _ids = row.id || ids.value;
-    proxy.$modal.confirm('是否确认删除标准管理编号为"' + _ids + '"的数据项？').then(function () {
-        return delStandards(_ids);
-    }).then(() => {
-        getList();
-        proxy.$modal.msgSuccess("删除成功");
-    }).catch(() => { });
-}
 
 /** 导出按钮操作 */
 function handleExport() {

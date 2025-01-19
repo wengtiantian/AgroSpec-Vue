@@ -3,37 +3,35 @@
 
 
         <div class="title-section">
-            <h1>{{ standardName }}</h1>
+            <h1>{{ StandarfDetail.fileName }}</h1>
         </div>
 
-        <div class="authors">
+        <!-- <div class="authors">
             <span v-for="(author, index) in authors" :key="index">
                 <a href="#">{{ author.name }}</a><sup>{{ author.affiliationIndex }}</sup>
                 <i v-if="author.hasEmail" class="icon-email"></i>
             </span>
-        </div>
+        </div> -->
 
         <div class="affiliations">
-            <span v-for="(affiliation, index) in affiliations" :key="index">
-                <a href="#">{{ index + 1 }}. {{ affiliation }}</a>
-            </span>
+            <a href="#">{{ 1 }}. {{ StandarfDetail.issuingAgency }}</a>
         </div>
 
         <div class="abstract-section">
-            <h3>摘要：</h3>
+            <h3>范围：</h3>
             <p id="abstract-text">
-                {{ abstractText }}
+                {{ StandarfDetail.serviceItems }}
             </p>
         </div>
 
-        <div class="keywords-section">
+        <!-- <div class="keywords-section">
             <h3>范围：</h3>
 
             <p v-for="(keyword, index) in keywords" :key="index" href="#">
                 {{ keyword }}
             </p>
 
-        </div>
+        </div> -->
 
 
 
@@ -46,47 +44,34 @@
 </template>
   
 <script setup>
-import router from '@/router';
 import { ref } from 'vue';
+import { getStandards } from '@/api/public'
+const router = useRouter();
+const route = useRoute();
 
-// 数据
-const standardName = '农业社会化服务组织服务质量评价标准';
-const hasVideo = true;
-const authors = [
-    { name: '陈悦均', affiliationIndex: 1, hasEmail: false },
-    { name: '缪俊炜', affiliationIndex: 1, hasEmail: true },
-];
-const affiliations = ['江西省生子岩种养殖农民专业合作社'];
-const abstractText = `农业社会化服务组织应提供以下服务内容：
+const StandarfDetail = ref({});
 
-农机作业服务：包括播种、施肥、植保、收获等机械化作业服务。
-农资供应服务：包括种子、化肥、农药等农业生产资料的采购与配送。
-技术指导服务：包括农作物种植、病虫害防治、土壤改良等方面的技术支持与培训。
-农产品加工与销售服务：包括农产品的初加工、包装、贮藏和市场销售服务。`;
-const keywords = ['本标准规定了农业社会化服务组织的服务内容、服务流程、服务评价指标、评价方法和监督管理要求。本标准适用于从事农业社会化服务的各类组织，包括农机合作社、农业生产托管服务公司、农产品加工配送企业等'];
+const baseUrl = import.meta.env.VITE_APP_BASE_API;
+getStandards(route.query.id).then((res) => {
+    StandarfDetail.value = res.data;
 
+})
 
-// 抽象控制
-const showFullAbstract = ref(false);
-
-const expandAbstract = () => {
-    showFullAbstract.value = true;
-};
-
-const collapseAbstract = () => {
-    showFullAbstract.value = false;
-};
-
-// 摘要的截断处理
-const truncatedAbstract = ref('');
-if (abstractText.length > 100) {
-    truncatedAbstract.value = abstractText.slice(0, 100) + '...';
-} else {
-    truncatedAbstract.value = abstractText;
+function openNewWindow(path) {
+    const newWindow = window.open(window.location.origin);
+    if (newWindow) {
+        // 在新窗口中设置路由
+        newWindow.location.href = `${window.location.origin}${path}`;
+    } else {
+        console.error('窗口打开失败');
+    }
 }
 
+
 const GoRead = () => {
-    router.push({ name: 'OnlineReading' });
+    console.log(StandarfDetail)
+    openNewWindow('/online-reading?src=' + baseUrl + StandarfDetail.value.fileNumber)
+
 }
 </script>
   

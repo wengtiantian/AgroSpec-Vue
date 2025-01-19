@@ -18,8 +18,8 @@
                 <el-descriptions-item label="法人代表">{{ basicInfo.corporate }}</el-descriptions-item>
                 <el-descriptions-item label="经营状态"> <dict-tag :options="es_manage_status" :value="basicInfo.manageForm" />
                 </el-descriptions-item>
-                <el-descriptions-item label="详细地址">{{ basicInfo.regionXx }}</el-descriptions-item>
-                <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item>
+                <el-descriptions-item label="详细地址">{{ basicInfo.regionPre + basicInfo.regionXx }}</el-descriptions-item>
+                <!-- <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item> -->
 
                 <!-- Service Situation -->
                 <el-descriptions-item label="从业人数">{{ basicInfo.population }}</el-descriptions-item>
@@ -44,6 +44,11 @@
                 <el-descriptions-item label="主体图片"><image-preview :src="basicInfo.pictureUrls" :width="100"
                         :height="100" /></el-descriptions-item>
 
+                <el-descriptions-item label="服务品种">
+                    <div :key="item" v-for="item in basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx)">{{
+                        item }}</div>
+                    <!-- {{ basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx) }} -->
+                </el-descriptions-item>
 
             </el-descriptions>
             <!-- Agricultural Machinery Information -->
@@ -95,8 +100,8 @@
                 <el-descriptions-item label="经营状态">
                     <dict-tag :options="es_manage_status" :value="basicInfo.manageForm" />
                 </el-descriptions-item>
-                <el-descriptions-item label="详细地址">{{ basicInfo.regionXx }}</el-descriptions-item>
-                <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item>
+                <el-descriptions-item label="详细地址">{{ basicInfo.regionPre + basicInfo.regionXx }}</el-descriptions-item>
+                <!-- <el-descriptions-item label="服务区域ID">{{ basicInfo.regionId }}</el-descriptions-item> -->
 
                 <!-- Service Situation -->
                 <el-descriptions-item label="从业人数">{{ basicInfo.population }}</el-descriptions-item>
@@ -128,9 +133,10 @@
                     <image-preview :src="basicInfo.pictureUrls && basicInfo.pictureUrls" :width="100" :height="100" />
                 </el-descriptions-item>
 
-
-                <el-descriptions-item label="服务范围">
-                    <ServiceTypeSelector :disabled="true" v-model="storedPaths" />
+                <el-descriptions-item label="服务品种">
+                    <div :key="item" v-for="item in basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx)">{{
+                        item }}</div>
+                    <!-- {{ basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx) }} -->
                 </el-descriptions-item>
 
             </el-descriptions>
@@ -152,9 +158,10 @@
     <el-dialog :close-on-click-modal="false" v-if="showSteps" title="申请准入" v-model="showSteps" width="50%">
         <el-steps :active="activeStep" finish-status="success" align-center style="margin-bottom: 20px;">
             <el-step title="基本信息"></el-step>
-            <el-step title="服务情况"></el-step>
             <el-step title="主体情况"></el-step>
-            <el-step title="添加农机信息"></el-step>
+            <el-step title="服务情况"></el-step>
+
+            <!-- <el-step title="添加农机信息"></el-step> -->
         </el-steps>
 
         <!-- Step 1: Basic Information -->
@@ -185,7 +192,7 @@
 
                 </el-form-item>
                 <el-form-item label="地址">
-                    <RegionCascader :width="'100%'" v-model:text="basicInfo.regionXx" v-model="selectedRegionPath" />
+                    <RegionCascader :width="'100%'" v-model:text="basicInfo.regionPre" v-model="basicInfo.regionId" />
                 </el-form-item>
                 <el-form-item label="详细地址">
 
@@ -225,14 +232,6 @@
                 <el-form-item label="服务粮食作物面积">
                     <el-input v-model="basicInfo.cropArea" />
                 </el-form-item>
-            </el-form>
-        </div>
-
-        <!-- Step 3: Subject Situation -->
-        <div v-if="activeStep === 2">
-            <el-form :model="basicInfo">
-                <ServiceTypeSelector v-model="storedPaths" />
-                <el-divider></el-divider>
 
                 <el-form-item label="主体介绍">
                     <editor v-model="basicInfo.introduce" :min-height="192" />
@@ -250,11 +249,63 @@
                 <el-form-item label="主体图片URL">
                     <image-upload v-model="basicInfo.pictureUrls" />
                 </el-form-item>
+                <div v-for="(machine, index) in machineInfoList" :key="index" class="machine-form">
+                    <el-form :model="machine">
+                        <el-form-item label="农机名称">
+                            <el-input v-model="machine.machineName" />
+                        </el-form-item>
+                        <el-form-item label="农机型号">
+                            <el-input v-model="machine.machineModel" />
+                        </el-form-item>
+                        <el-form-item label="终端编号">
+                            <el-input v-model="machine.terminalNumber" />
+                        </el-form-item>
+                        <el-form-item label="生产厂家">
+                            <el-input v-model="machine.manufacturer" />
+                        </el-form-item>
+                        <el-form-item label="农机图片">
+                            <image-upload v-model="machine.machineImageUrl" />
+                        </el-form-item>
+                    </el-form>
+                    <div class="delete">
+                        <el-button type="danger" @click="removeMachineInfo(index)">删除</el-button>
+                    </div>
+                    <el-divider></el-divider>
+                </div>
+
+                <el-button type="primary" @click="addMachineInfo">添加农机信息</el-button>
+            </el-form>
+        </div>
+
+        <!-- Step 3: Subject Situation -->
+        <div v-if="activeStep === 2">
+            <!-- {{ 111 + basicInfo.serviceTypeXx }} -->
+            <el-form :model="basicInfo">
+
+                <ServiceTypeSelector v-model="basicInfo.serviceTypePath" v-model:selected-text="basicInfo.serviceTypeXx" />
+                <el-divider></el-divider>
+                <!-- 
+                <el-form-item label="主体介绍">
+                    <editor v-model="basicInfo.introduce" :min-height="192" />
+
+                </el-form-item>
+                <el-form-item label="主体Logo">
+                    <image-upload v-model="basicInfo.logo" />
+                </el-form-item>
+                <el-form-item label="主体视频">
+                    <file-upload :limit="1" :fileSize="100" :fileType="['mp4']" v-model="basicInfo.video" />
+                </el-form-item>
+                <el-form-item label="营业执照">
+                    <image-upload v-model="basicInfo.manageCert" />
+                </el-form-item>
+                <el-form-item label="主体图片URL">
+                    <image-upload v-model="basicInfo.pictureUrls" />
+                </el-form-item> -->
             </el-form>
         </div>
 
         <!-- Step 4: Add Agricultural Machinery Information -->
-        <div v-if="activeStep === 3">
+        <!-- <div v-if="activeStep === 3">
             <div v-for="(machine, index) in machineInfoList" :key="index" class="machine-form">
                 <el-form :model="machine">
                     <el-form-item label="农机名称">
@@ -280,28 +331,28 @@
             </div>
 
             <el-button type="primary" @click="addMachineInfo">添加农机信息</el-button>
-        </div>
+        </div> -->
 
         <div class="dialog-footer">
             <el-button @click="previousStep" v-if="activeStep > 0">上一步</el-button>
-            <el-button type="primary" @click="nextStep">{{ activeStep === 3 ? '提交审核' : '下一步' }}</el-button>
+            <el-button type="primary" @click="nextStep">{{ activeStep === 2 ? '提交审核' : '下一步' }}</el-button>
         </div>
     </el-dialog>
 </template>
 <script setup>
 import { ref, watch } from 'vue';
 import { getServicerByUserId, editStatus } from '@/api/system/servicer'
+import { mergeFruitData } from '@/utils/service-type'
 import { submit, listAll } from '@/api/system/process'
 import ServiceTypeSelector from './TypeSelect.vue';
 import RegionCascader from './RegionSelect.vue';
 const status = ref(null); // Could be 'notApplied', 'pending', or 'approved'
 const showSteps = ref(false);
 const activeStep = ref(0);
-const selectedRegionPath = ref()
 const { proxy } = getCurrentInstance();
 const { es_is_auth, es_org_type, es_manage_status, sys_common_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status', 'sys_common_status');
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
-const storedPaths = ref('');
+
 const text = ref('');
 
 const data = reactive({
@@ -364,6 +415,7 @@ const { basicInfo, machineInfoList, queryParams, process } = toRefs(data)
 function fetchServicerByUserId() {
     getServicerByUserId().then(response => {
         status.value = response.data.isAuth
+        response.data.regionId = JSON.parse(response.data.regionId)
         if (status.value === 0) {
             //未申请
             basicInfo.value = response.data
@@ -374,11 +426,11 @@ function fetchServicerByUserId() {
             process.value.servicerId = response.data.id;
             //待审核
             listAll(process.value).then(res => {
-                process.value = res.data[res.data.length - 1];
-                const data = JSON.parse(res.data[res.data.length - 1].auditContent);
+                process.value = res.data[0];
+                const data = JSON.parse(res.data[0].auditContent);
                 basicInfo.value = data.basicInfo;
+                console.log(basicInfo.value)
                 machineInfoList.value = data.machineInfoList;
-                storedPaths.value = data.type;
 
             })
 
@@ -386,11 +438,10 @@ function fetchServicerByUserId() {
             process.value.servicerId = response.data.id;
             //待审核
             listAll(process.value).then(res => {
-                process.value = res.data[res.data.length - 1];
-                const data = JSON.parse(res.data[res.data.length - 1].auditContent);
+                process.value = res.data[0];
+                const data = JSON.parse(res.data[0].auditContent);
                 basicInfo.value = data.basicInfo;
                 machineInfoList.value = data.machineInfoList;
-                storedPaths.value = data.type;
 
             })
 
@@ -422,7 +473,7 @@ const startApplication = () => {
 };
 
 const nextStep = () => {
-    if (activeStep.value < 3) {
+    if (activeStep.value < 2) {
         activeStep.value++;
     } else {
         submitApplication();
@@ -453,7 +504,7 @@ const submitApplication = () => {
         deletedAt: null
     }
     process.value.servicerId = basicInfo.value.id;
-    process.value.auditContent = JSON.stringify({ basicInfo: basicInfo.value, machineInfoList: machineInfoList.value, type: storedPaths.value })
+    process.value.auditContent = JSON.stringify({ basicInfo: basicInfo.value, machineInfoList: machineInfoList.value })
     console.log(process.value);
     submit(process.value).then(res => {
         editStatus({ id: process.value.servicerId, isAuth: 2 }).then(res2 => {

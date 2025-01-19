@@ -4,74 +4,76 @@
     <h2 style="text-align: center; padding: 15px 0;">基本信息</h2>
     <el-descriptions :column="2" :size="size" border>
       <el-descriptions-item label="主体名称">
-        {{ basicData.name }}
+        {{ basicInfo.name }}
       </el-descriptions-item>
 
       <el-descriptions-item label="组织类型">
-        <dict-tag :options="es_org_type" :value="basicData.typeId" />
+        <dict-tag :options="es_org_type" :value="basicInfo.typeId" />
       </el-descriptions-item>
       <el-descriptions-item label="联系人电话">
-        {{ basicData.accountPhone }}
+        {{ basicInfo.accountPhone }}
       </el-descriptions-item>
       <el-descriptions-item label="联系人">
-        {{ basicData.corporate }}
+        {{ basicInfo.corporate }}
       </el-descriptions-item>
       <el-descriptions-item label="经营状态">
-        <dict-tag :options="es_manage_status" :value="basicData.manageForm" />
+        <dict-tag :options="es_manage_status" :value="basicInfo.manageForm" />
       </el-descriptions-item>
       <el-descriptions-item label="地址">
-        {{ basicData.regionXx }}
+        {{ basicInfo.regionPre + basicInfo.regionXx }}
       </el-descriptions-item>
       <el-descriptions-item label="主体介绍">
-        {{ basicData.introduce }}
+        {{ basicInfo.introduce }}
       </el-descriptions-item>
       <el-descriptions-item label="Logo">
-        <image-preview :src="basicData.logo" :width="50" :height="50" />
+        <image-preview :src="basicInfo.logo" :width="50" :height="50" />
       </el-descriptions-item>
       <el-descriptions-item label="主体视频">
-        <video :src="baseUrl + basicData.video" controls width="500" height="200"></video>
+        <video :src="baseUrl + basicInfo.video" controls width="500" height="200"></video>
       </el-descriptions-item>
       <el-descriptions-item label="主体图片">
-        <image-preview :src="basicData.pictureUrls" :width="100" :height="100" />
+        <image-preview :src="basicInfo.pictureUrls" :width="100" :height="100" />
       </el-descriptions-item>
       <el-descriptions-item label="从业人数">
-        {{ basicData.population }}人
+        {{ basicInfo.population }}人
       </el-descriptions-item>
       <el-descriptions-item label="年服务营业收入">
-        {{ basicData.income }}万元
+        {{ basicInfo.income }}万元
       </el-descriptions-item>
       <el-descriptions-item label="服务对象数">
-        {{ basicData.serveNum }}个
+        {{ basicInfo.serveNum }}个
       </el-descriptions-item>
       <el-descriptions-item label="服务小农户数">
-        {{ basicData.farmersNum }}个
+        {{ basicInfo.farmersNum }}个
       </el-descriptions-item>
       <el-descriptions-item label="年服务面积">
-        {{ basicData.serveArea }}亩
+        {{ basicInfo.serveArea }}亩
       </el-descriptions-item>
       <el-descriptions-item label="年畜牧服务量">
-        {{ basicData.raiseNum }}头/只
+        {{ basicInfo.raiseNum }}头/只
       </el-descriptions-item>
       <el-descriptions-item label="年水产服务量">
-        {{ basicData.waterNum }}尾
+        {{ basicInfo.waterNum }}尾
       </el-descriptions-item>
       <el-descriptions-item label="其他行业服务总量">
-        {{ basicData.otherNum }}个
+        {{ basicInfo.otherNum }}个
       </el-descriptions-item>
       <el-descriptions-item label="服务粮食作物面积">
-        {{ basicData.cropArea }}亩
+        {{ basicInfo.cropArea }}亩
       </el-descriptions-item>
       <el-descriptions-item label="是否已准入">
         <div class="auth">
-          <dict-tag :options="es_is_auth" :value="basicData.isAuth" />
-          <el-button v-if="basicData.isAuth == 0" type="primary" link>申请准入
+          <dict-tag :options="es_is_auth" :value="basicInfo.isAuth" />
+          <el-button v-if="basicInfo.isAuth == 0" type="primary" link>申请准入
           </el-button>
         </div>
 
       </el-descriptions-item>
-      <el-descriptions-item label="服务范围">
-        <ServiceTypeSelector :disabled="true" v-model="type" />
 
+      <el-descriptions-item label="服务品种">
+        <div :key="item" v-for="item in basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx)">{{
+          item }}</div>
+        <!-- {{ basicInfo.serviceTypeXx && mergeFruitData(basicInfo.serviceTypeXx) }} -->
       </el-descriptions-item>
     </el-descriptions>
 
@@ -106,18 +108,17 @@ import { listAll } from '@/api/system/machinery'
 import * as echarts from 'echarts';
 import ServiceTypeSelector from '@/views/servicer/TypeSelect.vue'
 const { proxy } = getCurrentInstance();
-
+import { mergeFruitData } from '@/utils/service-type'
 const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
 // 创建一个响应式引用来保存DOM元素
 const chartDom = ref(null);
 const chartDom2 = ref(null);
-const type = ref('1,2,31,2,3:1,2,11:4,7,8')
 let chartInstance = null;
 let chartInstance2 = null;
 
 const data = reactive({
-  basicData: {},
+  basicInfo: {},
   sqInfo: {
     score: 4.2
   },
@@ -126,11 +127,13 @@ const data = reactive({
   machineInfoList: []
 });
 
-const { queryParams, basicData, rules, sqInfo, machineInfoList } = toRefs(data);
+const { queryParams, basicInfo, rules, sqInfo, machineInfoList } = toRefs(data);
 
 function fetchServicerByUserId() {
   getServicerByUserId().then(response => {
-    basicData.value = response.data;
+    basicInfo.value = response.data;
+    basicInfo.value.serviceTypeXx = JSON.parse(basicInfo.value.serviceTypeXx)
+    console.log(basicInfo.value)
     listAll().then(response2 => {
       machineInfoList.value = response2.data;
       console.log(machineInfoList.value)

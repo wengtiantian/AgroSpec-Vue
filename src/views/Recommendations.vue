@@ -4,9 +4,9 @@
         <div class="card-row">
             <div class="card" v-for="(subject, index) in serviceSubjects" :key="index"
                 @click="goToSubjectDetail(subject.id)">
-                <img :src="subject.image" alt="服务主体图片">
+                <img :src="baseUrl + subject.logo" width="500" height="300" alt="服务主体图片">
                 <p>{{ subject.name }}</p>
-                <p>{{ subject.type }}</p>
+                <dict-tag :options="es_org_type" :value="subject.typeId" />
                 <el-rate v-model="subject.quality" disabled></el-rate>
             </div>
         </div>
@@ -14,10 +14,10 @@
         <div class="card-row">
             <div class="card" v-for="(standard, index) in serviceStandards" :key="index"
                 @click="goToStandardDetail(standard.id)">
-                <img :src="standard.image" alt="服务标准图片">
-                <p>{{ standard.name }}</p>
-                <p>{{ standard.publisher }}</p>
-                <p>{{ standard.time }}</p>
+                <img :src="baseUrl + standard.attachments" width="500" height="300" alt="服务标准图片">
+                <p>{{ standard.fileName }}</p>
+                <p>{{ standard.issuingAgency }}</p>
+                <p>{{ standard.issueDate }}</p>
             </div>
         </div>
     </div>
@@ -25,18 +25,39 @@
 
 
 <script setup>
+import { listServicer, listStandards } from "@/api/public";
+const baseUrl = import.meta.env.VITE_APP_BASE_API;
+const { proxy } = getCurrentInstance();
+const { es_is_auth, es_org_type, es_manage_status } = proxy.useDict('es_is_auth', 'es_org_type', 'es_manage_status');
+const data = reactive({
+    form: {},
+    queryParams: {
+        pageNum: 1,
+        pageSize: 3,
+    },
+    rules: {
+    }
+});
 
-const serviceSubjects = ref([
-    { id: 1, name: '主体1', image: 'src/assets/logo/logo.jpeg', type: '类型1', quality: 4 },
-    { id: 2, name: '主体2', image: 'src/assets/logo/logo.jpeg', type: '类型2', quality: 3.5 },
-    { id: 3, name: '主体3', image: 'src/assets/logo/logo.jpeg', type: '类型3', quality: 5 },
-]);
+const { queryParams, form, rules } = toRefs(data);
+const serviceSubjects = ref([]);
+const serviceStandards = ref([]);
+/** 查询列表 */
+function getList() {
+    listServicer(queryParams.value).then(response => {
+        serviceSubjects.value = response.rows;
+        serviceSubjects.value.map(v => {
+            v.quality = Math.random() * 3 + 2
+            return v
+        })
+    });
+    listStandards(queryParams.value).then(response => {
+        serviceStandards.value = response.rows;
+    })
+}
 
-const serviceStandards = ref([
-    { id: 1, name: '标准1', image: 'src/assets/logo/logo.jpeg', publisher: '发布者1', time: '2023-01-01' },
-    { id: 2, name: '标准2', image: 'src/assets/logo/logo.jpeg', publisher: '发布者2', time: '2023-02-01' },
-    { id: 3, name: '标准3', image: 'src/assets/logo/logo.jpeg', publisher: '发布者3', time: '2023-03-01' },
-]);
+
+
 
 
 const router = useRouter();
@@ -48,6 +69,8 @@ const goToSubjectDetail = (id) => {
 const goToStandardDetail = (id) => {
     router.push({ name: 'ServiceStandardDetail', query: { id } });
 };
+
+getList()
 </script>
 
 <style scoped>
