@@ -15,7 +15,7 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: import.meta.env.VITE_APP_BASE_API || '/dev-api',
   // 超时
   timeout: 10000
 })
@@ -28,6 +28,10 @@ service.interceptors.request.use(config => {
   const isRepeatSubmit = (config.headers || {}).repeatSubmit === false
   if (getToken() && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+  }
+  // 如果是FormData，删除Content-Type让浏览器自动设置
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
   }
   // get请求映射params参数
   if (config.method === 'get' && config.params) {
@@ -82,6 +86,10 @@ service.interceptors.response.use(res => {
       return res.data
     }
     if (code === 401) {
+      // 对标记为跳过认证弹窗的请求，静默处理401并直接抛错
+      if (res.config && res.config.headers && res.config.headers.skipAuthModal === true) {
+        return Promise.reject('无效的会话，或者会话已过期（静默）')
+      }
       if (!isRelogin.show) {
         isRelogin.show = true;
         ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {

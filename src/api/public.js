@@ -33,3 +33,16 @@ export function getStandards(id) {
         method: 'get'
     })
 }
+
+// 查询公开的行业资讯列表
+export function listPublicNews(query) {
+    return request({
+        url: '/public/news/list',
+        method: 'get',
+        params: query,
+        headers: {
+            isToken: false, // 不需要token
+            skipAuthModal: true // 401 静默处理
+        }
+    })
+}

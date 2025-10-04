@@ -9,7 +9,13 @@ export default function createVitePlugins(viteEnv, isBuild = false) {
     const vitePlugins = [vue()]
     vitePlugins.push(createAutoImport())
 	vitePlugins.push(createSetupExtend())
-    vitePlugins.push(createSvgIcon(isBuild))
+    
+    // 只有当 createSvgIcon 返回有效插件时才添加
+    const svgIconPlugin = createSvgIcon(isBuild)
+    if (svgIconPlugin) {
+        vitePlugins.push(svgIconPlugin)
+    }
+    
 	isBuild && vitePlugins.push(...createCompression(viteEnv))
     return vitePlugins
 }

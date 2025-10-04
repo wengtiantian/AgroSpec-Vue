@@ -93,7 +93,10 @@ watch(() => props.modelValue, val => {
     // 然后将数组转为对象数组
     fileList.value = list.map(item => {
       if (typeof item === "string") {
-        if (item.indexOf(baseUrl) === -1) {
+        if (item.startsWith('/profile/')) {
+          // 如果是/profile/开头的路径，直接使用，不拼接baseUrl
+          item = { name: item, url: item };
+        } else if (item.indexOf(baseUrl) === -1) {
           item = { name: baseUrl + item, url: baseUrl + item };
         } else {
           item = { name: item, url: item };

@@ -21,9 +21,13 @@
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button type="success" @click="loadAllTables">加载所有表</el-button>
       </el-form-item>
     </el-form>
     <el-row>
+      <div class="table-info" style="margin-bottom: 10px; color: #606266; font-size: 14px;">
+        共找到 <strong>{{ total }}</strong> 张表，已选择 <strong>{{ tables.length }}</strong> 张表
+      </div>
       <el-table @row-click="clickRow" ref="table" :data="dbTableList" @selection-change="handleSelectionChange" height="260px">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="tableName" label="表名称" :show-overflow-tooltip="true"></el-table-column>
@@ -34,9 +38,10 @@
       <pagination
         v-show="total>0"
         :total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="getList"
+        :page="queryParams.pageNum"
+        :limit="queryParams.pageSize"
+        :page-sizes="[50, 100, 200, 500]"
+        @pagination="handlePagination"
       />
     </el-row>
     <template #footer>
@@ -59,7 +64,7 @@ const { proxy } = getCurrentInstance();
 
 const queryParams = reactive({
   pageNum: 1,
-  pageSize: 10,
+  pageSize: 50, // 设置足够大的分页大小以显示所有可导入表
   tableName: undefined,
   tableComment: undefined
 });
@@ -68,6 +73,13 @@ const emit = defineEmits(["ok"]);
 
 /** 查询参数列表 */
 function show() {
+  // 强制设置分页大小以确保显示所有表
+  queryParams.pageNum = 1;
+  queryParams.pageSize = 100;
+  queryParams.tableName = undefined;
+  queryParams.tableComment = undefined;
+  
+  console.log('打开导入表对话框，参数:', queryParams);
   getList();
   visible.value = true;
 }
@@ -81,9 +93,25 @@ function handleSelectionChange(selection) {
 }
 /** 查询表数据 */
 function getList() {
-  listDbTable(queryParams).then(res => {
-    dbTableList.value = res.rows;
-    total.value = res.total;
+  // 确保参数正确
+  const params = {
+    pageNum: queryParams.pageNum,
+    pageSize: queryParams.pageSize,
+    tableName: queryParams.tableName,
+    tableComment: queryParams.tableComment
+  };
+  
+  console.log('查询数据库表列表，参数:', params);
+  
+  listDbTable(params).then(res => {
+    console.log('数据库表列表响应:', res);
+    console.log(`表总数: ${res.total}, 当前页: ${res.rows ? res.rows.length : 0}`);
+    
+    dbTableList.value = res.rows || [];
+    total.value = res.total || 0;
+  }).catch(error => {
+    console.error('查询数据库表列表失败:', error);
+    proxy.$modal.msgError('查询数据库表列表失败: ' + (error.message || '未知错误'));
   });
 }
 /** 搜索按钮操作 */
@@ -96,6 +124,25 @@ function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
 }
+
+/** 加载所有表 */
+function loadAllTables() {
+  console.log('加载所有表...');
+  queryParams.pageNum = 1;
+  queryParams.pageSize = 100; // 设置足够大的分页大小以获取所有表
+  queryParams.tableName = undefined;
+  queryParams.tableComment = undefined;
+  getList();
+}
+
+/** 分页变化处理 */
+function handlePagination(pagination) {
+  console.log('分页变化:', pagination);
+  queryParams.pageNum = pagination.page;
+  queryParams.pageSize = pagination.limit;
+  getList();
+}
+
 /** 导入按钮操作 */
 function handleImportTable() {
   const tableNames = tables.value.join(",");

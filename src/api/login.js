@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 登录方法
+// 账号密码登录方法
 export function login(username, password, code, uuid) {
   const data = {
     username,
@@ -10,6 +10,23 @@ export function login(username, password, code, uuid) {
   }
   return request({
     url: '/login',
+    headers: {
+      isToken: false,
+      repeatSubmit: false
+    },
+    method: 'post',
+    data: data
+  })
+}
+
+// 手机验证码登录方法
+export function phoneLogin(phone, phoneCode) {
+  const data = {
+    phone,
+    phoneCode
+  }
+  return request({
+    url: '/phoneLogin',
     headers: {
       isToken: false,
       repeatSubmit: false
@@ -31,6 +48,18 @@ export function register(data) {
   })
 }
 
+// 发送手机验证码
+export function sendPhoneCode(phone) {
+  return request({
+    url: '/sendPhoneCode',
+    headers: {
+      isToken: false
+    },
+    method: 'post',
+    data: { phone }
+  })
+}
+
 // 获取用户详细信息
 export function getInfo() {
   return request({
@@ -43,7 +72,7 @@ export function getInfo() {
 export function logout() {
   return request({
     url: '/logout',
-    method: 'post'
+    method: 'get'
   })
 }
 

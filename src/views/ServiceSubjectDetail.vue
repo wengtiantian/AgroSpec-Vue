@@ -2,7 +2,7 @@
     <div class="service-subject-detail">
         <!-- 顶部部分：返回按钮 -->
         <!-- <div class="top-section">
-            <el-button type="text" @click="goBack" class="back-button">← 返回上一级</el-button>
+            <el-button link @click="goBack" class="back-button">← 返回上一级</el-button>
         </div> -->
 
         <!-- 中间部分：服务主体介绍 -->
@@ -12,13 +12,13 @@
             </div>
             <div class="info-section">
                 <h2>{{ subjectDetail.name }}</h2>
-                <p>电话: {{ subjectDetail.accountPhone }}</p>
-                <p>地址: {{ subjectDetail.regionPre + subjectDetail.regionXx }}</p>
-                <p :key="item"
+                <div>电话: {{ subjectDetail.accountPhone }}</div>
+                <div>地址: {{ subjectDetail.regionPre + subjectDetail.regionXx }}</div>
+                <div :key="item"
                     v-for="item in subjectDetail.serviceTypeXx && mergeFruitData(JSON.parse(subjectDetail.serviceTypeXx))">
-                    {{ item }}</p>
-                <p>服务评价：<el-rate v-model="subjectDetail.quality" disabled></el-rate></p>
-                <p class="introduction">简介: {{ subjectDetail.introduce }}</p>
+                    {{ item }}</div>
+                <div>服务评价：<el-rate v-model="subjectDetail.quality" disabled></el-rate></div>
+                <div class="introduction">简介: {{ removeHtmlTags(subjectDetail.introduce) }}</div>
             </div>
         </div>
 
@@ -46,7 +46,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { mergeFruitData } from '@/utils/service-type'
 import { getServicer } from "@/api/public";
 import { ElMessage } from 'element-plus';
-import { addbyproducter } from "@/api/system/reviews";
+import { addbyproducter } from "@/api/base/reviews";
 
 const router = useRouter();
 const route = useRoute();
@@ -82,6 +82,12 @@ const submitReview = async () => {
     rating.value = 5; // 重置评分
 
 };
+
+// 移除HTML标签的函数
+function removeHtmlTags(str) {
+    if (!str) return '';
+    return str.replace(/<[^>]*>/g, '');
+}
 </script>
 
 <style scoped>
@@ -156,7 +162,7 @@ const submitReview = async () => {
     /* 深绿色标题 */
 }
 
-.info-section p {
+.info-section div {
     font-size: 18px;
     margin-bottom: 10px;
     color: #666;

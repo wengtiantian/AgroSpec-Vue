@@ -6,6 +6,9 @@ import ServiceStandardDetail from '../views/ServiceStandardDetail.vue';
 import OnlineReading from '../views/OnlineReading.vue';
 import SearchResult from '../views/SearchResult.vue';
 import SearchResultSubject from '../views/SearchResultSubject.vue';
+import AdminDashboard from '../views/admin/dashboard.vue';
+import DefaultIndex from '../views/Dashboard-index.vue';
+import PlantationStandards from '../views/PlantationStandards.vue';
 /**
  * Note: 路由配置项
  *
@@ -20,15 +23,15 @@ import SearchResultSubject from '../views/SearchResultSubject.vue';
  * roles: ['admin', 'common']       // 访问路由的角色权限
  * permissions: ['a:a:a', 'b:b:b']  // 访问路由的菜单权限
  * meta : {
-    noCache: true                   // 如果设置为true，则不会被 <keep-alive> 缓存(默认 false)
-    title: 'title'                  // 设置该路由在侧边栏和面包屑中展示的名字
-    icon: 'svg-name'                // 设置该路由的图标，对应路径src/assets/icons/svg
-    breadcrumb: false               // 如果设置为false，则不会在breadcrumb面包屑中显示
-    activeMenu: '/system/user'      // 当路由设置了该属性，则会高亮相对应的侧边栏。
-  }
+ noCache: true                   // 如果设置为true，则不会被 <keep-alive> 缓存(默认 false)
+ title: 'title'                  // 设置该路由在侧边栏和面包屑中展示的名字
+ icon: 'svg-name'                // 设置该路由的图标，对应路径src/assets/icons/svg
+ breadcrumb: false               // 如果设置为false，则不会在breadcrumb面包屑中显示
+ activeMenu: '/system/user'      // 当路由设置了该属性，则会高亮相对应的侧边栏。
+ }
  */
 
-// 公共路由
+// 公共路由——让所有用户都可以访问
 export const constantRoutes = [
   {
     path: '/redirect',
@@ -103,7 +106,36 @@ export const constantRoutes = [
         path: '/search-result-subject',
         name: 'SearchResultSubject',
         component: SearchResultSubject,
-      }
+      },
+      {
+        path: '/news',
+        name: 'News',
+        component: () => import('@/views/base/news/index'),
+      },
+      // 服务主体申请页面
+      {
+        path: '/apply/servicer',
+        name: 'ServicerApply',
+        component: () => import('@/views/apply/servicer/index'),
+        meta: { title: '服务主体申请' },
+        hidden: true,
+      },
+      // 服务主体审核页面
+      {
+        path: '/audit/servicer',
+        name: 'ServicerAudit',
+        component: () => import('@/views/audit/servicer/index'),
+        meta: { title: '服务主体审核' },
+        hidden: true,
+      },
+      // 我的申请页面
+      {
+        path: '/my-application',
+        name: 'MyApplication',
+        component: () => import('@/views/my-application/index'),
+        meta: { title: '我的申请' },
+        hidden: true,
+      },
 
     ],
   },
@@ -111,12 +143,16 @@ export const constantRoutes = [
   {
     path: '/index',
     component: Layout,
-    component: () => import('@/views/index'),
-    name: 'Index',
-    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/Dashboard-index'),
+        name: 'Index',
+        meta: { title: '首页', icon: 'dashboard'}
+      }
+    ],
+    
   },
-
-
   {
     path: '/user',
     component: Layout,
@@ -126,11 +162,39 @@ export const constantRoutes = [
       {
         path: 'profile',
         component: () => import('@/views/system/user/profile/index'),
-        name: 'Profile2',
+        name: 'Profile',
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  },
+  {
+    path: '/plantation-standards',
+    name: 'PlantationStandards',
+    component: () => import('@/views/PlantationStandards'),
+    meta: { title: '种植标准库' },
+    hidden: true,
+  },
+  {
+    path: '/breeding-standards',
+    name: 'BreedingStandards',
+    component: () => import('@/views/BreedingStandards'),
+    meta: { title: '养殖标准库' },
+    hidden: true,
+  },
+  {
+    path: '/quality-evaluation/dynamic-system',
+    name: 'DynamicReview',
+    component: () => import('@/views/quality-evaluation/DynamicReview'),
+    meta: { title: '动态评价系统'},
+    hidden: true,
+  },
+  {
+    path: '/standards-center',
+    name: 'StandardsCenter',
+    component: () => import('@/views/StandardsCenter'),
+    meta: { title: '农业标准库' },
+    hidden: true,
+  },
 ]
 
 // 动态路由，基于用户权限动态去加载
@@ -205,34 +269,60 @@ export const dynamicRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/servicer',
-  //   component: Layout,
-  //   roles: ['servicer'],
-  //   children:[
-  //     {
-  //       path: 'profile',
-  //       component: () => import('@/views/servicer/profile'),
-  //       name: 'Profile1',
-  //       meta: { title: '主体中心', icon: 'user', activeMenu: '/servicer/profile' }
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: '/producter',
-  //   component: Layout,
-  //   roles: ['producter'],
-  //   children:[
-  //     {
-  //       path: 'profile',
-  //       component: () => import('@/views/producter/profile'),
-  //       name: 'Profile2',
-  //       meta: { title: '主体中心', icon: 'user', activeMenu: '/producter/profile' }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/servicer',
+    component: Layout,
+    roles: ['servicer'],
+    children:[
+      {
+        path: 'profile',
+        component: () => import('@/views/subject/servicer_mess/profile'),
+        name: 'Profile1',
+        meta: { title: '主体中心', icon: 'user', activeMenu: '/servicer/profile' }
+      }
+    ]
+  },
+  {
+    path: '/producter',
+    component: Layout,
+    roles: ['producter'],
+    children:[
+      {
+        path: 'profile',
+        component: () => import('@/views/subject/producter_mess/profile'),
+        name: 'Profile2',
+        meta: { title: '主体中心', icon: 'user', activeMenu: '/producter/profile' }
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    component: Layout,
+    roles: ['admin'],
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/admin/dashboard'),
+        name: 'AdminDashboard',
+        meta: { title: '超级管理', icon: 'dashboard', activeMenu: '/admin/dashboard' }
+      }
+    ]
+  },
+  {
+    path: '/base/reviews',
+    component: Layout,
+    roles: ['admin','common'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/base/reviews/index'),
+        name: 'BaseReviews',
+        meta: { title: '评论管理', icon: 'reviews', activeMenu: '/base/reviews' }
+      }
+    ]
+  },
+  
 ]
-
 const router = createRouter({
   history: createWebHistory(),
   routes: constantRoutes,
@@ -246,3 +336,4 @@ const router = createRouter({
 });
 
 export default router;
+

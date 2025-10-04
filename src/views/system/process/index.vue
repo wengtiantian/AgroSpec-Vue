@@ -203,11 +203,11 @@
 
 <script setup name="Process">
 import { listProcess, getProcess, delProcess, addProcess, updateProcess } from "@/api/system/process";
-import { addMachinery } from "@/api/system/machinery"
-import ServiceTypeSelector from '@/views/servicer/TypeSelect.vue'
+import { addMachinery } from "@/api/support/machinery.js"
+import ServiceTypeSelector from '@/views/subject/servicer_mess/TypeSelect.vue'
 const { proxy } = getCurrentInstance();
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
-import { updateServicer } from '@/api/system/servicer'
+import { updateServicer } from '@/api/subject/servicer.js'
 import { mergeFruitData } from '@/utils/service-type'
 const { es_sh_jg, es_manage_status, es_org_type } = proxy.useDict('es_sh_jg', 'es_manage_status', 'es_org_type');
 const processList = ref([]);

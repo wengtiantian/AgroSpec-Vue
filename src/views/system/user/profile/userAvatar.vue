@@ -126,8 +126,14 @@ function uploadImg() {
     formData.append("avatarfile", data, options.filename);
     uploadAvatar(formData).then(response => {
       open.value = false;
-      options.img = import.meta.env.VITE_APP_BASE_API + response.imgUrl;
-      userStore.avatar = options.img;
+      // 如果是/profile/开头的路径，直接使用，不拼接VITE_APP_BASE_API
+      if (response.imgUrl && response.imgUrl.startsWith('/profile/')) {
+        options.img = response.imgUrl;
+        userStore.avatar = response.imgUrl;
+      } else {
+        options.img = import.meta.env.VITE_APP_BASE_API + response.imgUrl;
+        userStore.avatar = options.img;
+      }
       proxy.$modal.msgSuccess("修改成功");
       visible.value = false;
     });

@@ -17,9 +17,9 @@ import directive from './directive' // directive
 import plugins from './plugins' // plugins
 import { download } from '@/utils/request'
 
-// svg图标
-import 'virtual:svg-icons-register'
-import SvgIcon from '@/components/SvgIcon'
+// svg图标 - 临时注释以避免启动错误
+// import 'virtual:svg-icons-register'
+// import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
 
 import './permission' // permission control
@@ -69,8 +69,9 @@ app.component('Editor', Editor)
 app.use(router)
 app.use(store)
 app.use(plugins)
+// 临时注释以避免启动错误
 app.use(elementIcons)
-app.component('svg-icon', SvgIcon)
+// app.component('svg-icon', SvgIcon)
 
 directive(app)
 

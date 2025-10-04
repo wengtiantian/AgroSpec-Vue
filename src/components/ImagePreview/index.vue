@@ -40,6 +40,10 @@ const realSrc = computed(() => {
   if (isExternal(real_src)) {
     return real_src;
   }
+  // 如果是/profile/开头的路径，直接使用，不拼接VITE_APP_BASE_API
+  if (real_src.startsWith('/profile/')) {
+    return real_src;
+  }
   return import.meta.env.VITE_APP_BASE_API + real_src;
 });
 
@@ -51,6 +55,10 @@ const realSrcList = computed(() => {
   let srcList = [];
   real_src_list.forEach(item => {
     if (isExternal(item)) {
+      return srcList.push(item);
+    }
+    // 如果是/profile/开头的路径，直接使用，不拼接VITE_APP_BASE_API
+    if (item.startsWith('/profile/')) {
       return srcList.push(item);
     }
     return srcList.push(import.meta.env.VITE_APP_BASE_API + item);

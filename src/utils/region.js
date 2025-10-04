@@ -1,4 +1,4 @@
-import { listRegion } from '@/api/system/region'; // 替换为你的API调用
+import { listRegion } from '@/api/base/region.js'; // 替换为你的API调用
 
 // 根据路径 ids 获取地区文本
 export async function getRegionTextByPath(ids) {
